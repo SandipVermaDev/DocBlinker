@@ -2,6 +2,7 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
+import shutil 
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
 import google.generativeai as genai
@@ -65,8 +66,7 @@ def get_conversation_chain():
 # Function to handle user input and generate response
 def user_input(user_question):
     if not os.path.exists("faiss_index"):
-        st.error("Please upload and process PDF documents first.")
-        return
+        return "Error: Please upload and process PDF documents first."
 
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
@@ -80,17 +80,44 @@ def user_input(user_question):
         return_only_outputs=True
     )
 
-    print(response)
-    st.write("Answer:", response['output_text'])
+    return response['output_text']
 
 def main():
     st.set_page_config(page_title="PDF Question Answering", page_icon=":book:")
     st.header("PDF Question Answering with LangChain and Google Generative AI")
 
-    user_question = st.text_input("Enter your question about the PDF documents:")
+    #Clear vector store on app start/refresh
+    if 'cleared' not in st.session_state:
+        if os.path.exists("faiss_index"):
+            shutil.rmtree("faiss_index")
+        st.session_state.cleared = True
+        st.session_state.messages = []
 
-    if user_question:
-        user_input(user_question)
+    # New chat interface with centered layout
+    # Display chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+     # Input box at bottom (centered)
+    if user_question := st.chat_input("Enter your question about the PDF documents:"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": user_question})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(user_question)
+        
+        # Get response
+        response = user_input(user_question)
+        
+        # Display assistant response
+        with st.chat_message("assistant"):
+            st.markdown(response)
+        
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
+
 
     with st.sidebar:
         st.title("Menu")
@@ -98,12 +125,46 @@ def main():
         if st.button("Submit and Process"):
             with st.spinner("Processing..."):
                 if pdf_docs:
+                    # Clear previous data
+                    if os.path.exists("faiss_index"):
+                        shutil.rmtree("faiss_index")
+
                     text = pdf_to_text(pdf_docs)
                     text_chunks = get_text_chunks(text)
                     get_vectorstore(text_chunks)
                     st.success("PDF documents processed and vector store created successfully!")
                 else:
                     st.error("Please upload at least one PDF document.")
+
+        # Add chat management buttons
+        st.divider()
+        st.subheader("Chat Management")
+
+         # Export chat button
+        if st.button("Export Chat"):
+            if st.session_state.messages:
+                chat_text = "\n\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages])
+                st.download_button(
+                    label="Download Chat History",
+                    data=chat_text,
+                    file_name="chat_history.txt",
+                    mime="text/plain"
+                )
+            else:
+                st.warning("No chat history to export")
+        
+        # Clear chat button
+        if st.button("Clear Chat"):
+            st.session_state.messages = []
+            st.success("Chat history cleared!")
+        
+        # Reset session button
+        if st.button("Reset Session"):
+            if os.path.exists("faiss_index"):
+                shutil.rmtree("faiss_index")
+            st.session_state.messages = []
+            st.session_state.cleared = True
+            st.success("Session reset complete!")
 
 if __name__ == "__main__":
     main()
