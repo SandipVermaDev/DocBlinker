@@ -191,8 +191,14 @@ def main():
         # Clear chat button
         if st.button("Clear Chat"):
             st.session_state.messages = []
+            st.session_state.chat_cleared = True
+            st.rerun()
+
+        # Show success message after rerun
+        if st.session_state.get("chat_cleared", False):
             st.success("Chat history cleared!")
-        
+            st.session_state.chat_cleared = False 
+    
         # Reset session button
         if st.button("Reset Session"):
             if os.path.exists("faiss_index"):
