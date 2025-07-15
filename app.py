@@ -2,7 +2,9 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
-import shutil 
+import shutil
+import datetime
+from docx import Document
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
 import google.generativeai as genai
@@ -10,6 +12,7 @@ from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
+import io
 
 # Load environment variables
 load_dotenv()
@@ -17,13 +20,24 @@ load_dotenv()
 # Configure Google Generative AI
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Function to extract text from uploaded PDFs
-def pdf_to_text(pdf_docs):
-    text="" 
-    for pdf in pdf_docs:
-        pdf_reader = PdfReader(pdf)
+# Function to extract text from uploaded files
+def extract_text_from_file(uploaded_file):
+    text = ""
+    if uploaded_file.type == "application/pdf":
+        pdf_reader = PdfReader(uploaded_file)
         for page in pdf_reader.pages:
             text += page.extract_text()
+    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        doc = Document(io.BytesIO(uploaded_file.getvalue()))
+        for para in doc.paragraphs:
+            text += para.text + "\n"
+    return text
+
+# Function to process multiple files
+def files_to_text(files):
+    text = ""
+    for file in files:
+        text += extract_text_from_file(file)
     return text
 
 # Function to split text into chunks
@@ -66,7 +80,7 @@ def get_conversation_chain():
 # Function to handle user input and generate response
 def user_input(user_question):
     if not os.path.exists("faiss_index"):
-        return "Error: Please upload and process PDF documents first."
+        return "Error: Please upload and process documents first."
 
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
@@ -82,9 +96,23 @@ def user_input(user_question):
 
     return response['output_text']
 
+# Function to export chat with timestamps
+def export_chat():
+    if not st.session_state.messages:
+        return None
+    
+    chat_text = ""
+    for message in st.session_state.messages:
+        timestamp = message.get("timestamp", "")
+        role = message["role"].capitalize()
+        content = message["content"]
+        chat_text += f"{timestamp}{role}: {content}\n\n"
+    
+    return chat_text
+
 def main():
-    st.set_page_config(page_title="PDF Question Answering", page_icon=":book:")
-    st.header("PDF Question Answering with LangChain and Google Generative AI")
+    st.set_page_config(page_title="Document Question Answering", page_icon=":book:")
+    st.header("Document Question Answering with LangChain and Google Generative AI")
 
     #Clear vector store on app start/refresh
     if 'cleared' not in st.session_state:
@@ -93,16 +121,20 @@ def main():
         st.session_state.cleared = True
         st.session_state.messages = []
 
-    # New chat interface with centered layout
     # Display chat messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
      # Input box at bottom (centered)
-    if user_question := st.chat_input("Enter your question about the PDF documents:"):
+    if user_question := st.chat_input("Enter your question about the documents:"):
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
         # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": user_question})
+        st.session_state.messages.append({
+            "role": "user", 
+            "content": user_question,
+            "timestamp": timestamp
+        })
         
         # Display user message
         with st.chat_message("user"):
@@ -110,48 +142,51 @@ def main():
         
         # Get response
         response = user_input(user_question)
+        response_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
         
         # Display assistant response
         with st.chat_message("assistant"):
             st.markdown(response)
         
         # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({
+            "role": "assistant", 
+            "content": response,
+            "timestamp": response_timestamp
+        })
 
 
     with st.sidebar:
         st.title("Menu")
-        pdf_docs = st.file_uploader("Upload PDF documents and Click on the Submit and Process", type=["pdf"], accept_multiple_files=True)
+        uploaded_files = st.file_uploader("Upload documents (PDF or Word) and click Submit & Process", type=["pdf", "docx"], accept_multiple_files=True)
         if st.button("Submit and Process"):
             with st.spinner("Processing..."):
-                if pdf_docs:
-                    # Clear previous data
+                if uploaded_files:
                     if os.path.exists("faiss_index"):
                         shutil.rmtree("faiss_index")
 
-                    text = pdf_to_text(pdf_docs)
+                    text = files_to_text(uploaded_files)
                     text_chunks = get_text_chunks(text)
                     get_vectorstore(text_chunks)
-                    st.success("PDF documents processed and vector store created successfully!")
+                    st.success("Documents processed successfully!")
                 else:
-                    st.error("Please upload at least one PDF document.")
+                    st.error("Please upload at least one document.")
 
         # Add chat management buttons
         st.divider()
         st.subheader("Chat Management")
 
          # Export chat button
-        if st.button("Export Chat"):
-            if st.session_state.messages:
-                chat_text = "\n\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages])
-                st.download_button(
-                    label="Download Chat History",
-                    data=chat_text,
-                    file_name="chat_history.txt",
-                    mime="text/plain"
-                )
-            else:
-                st.warning("No chat history to export")
+        chat_text = export_chat()
+        if chat_text:
+            st.download_button(
+                label="Export Chat",
+                data=chat_text,
+                file_name=f"chat_history_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                mime="text/plain",
+                key="download_chat",
+                on_click=lambda: st.success("Chat exported successfully!"),
+            )
         
         # Clear chat button
         if st.button("Clear Chat"):
