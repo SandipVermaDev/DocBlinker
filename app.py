@@ -110,7 +110,6 @@ def main():
     # Add cyberpunk styling to buttons and sidebar
     st.markdown("""
     <style>
-        /* Cyberpunk button styling - FIXED SELECTORS */
         div.stButton > button:first-child {
             background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
             color: white !important;
@@ -129,7 +128,6 @@ def main():
             box-shadow: 0 0 20px rgba(0, 238, 255, 0.8) !important;
         }
         
-        /* Download button styling */
         div.stDownloadButton > button:first-child {
             background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
             color: white !important;
@@ -148,40 +146,32 @@ def main():
             box-shadow: 0 0 20px rgba(0, 238, 255, 0.8) !important;
         }
         
-        /* Cyberpunk header */
         .cyber-header {
             font-family: 'Arial', sans-serif;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             text-align: center;
-            background: linear-gradient(90deg, #00eeff, #ff00ff, #00ff9d);
+            background: linear-gradient(270deg, #00eeff, #ff00ff, #00ff9d, #bd00ff);
+            background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 10px rgba(0, 238, 255, 0.7);
-            margin-bottom: 1rem;
-            animation: glow 2s infinite alternate;
+            margin-bottom: 1.5rem;
+            animation: gradient-shift 3s ease infinite, glow-pulse 1.5s ease infinite alternate;
         }
         
-        @keyframes glow {
-            from { text-shadow: 0 0 10px rgba(0, 238, 255, 0.7); }
-            to { text-shadow: 0 0 20px rgba(0, 238, 255, 0.9), 0 0 30px rgba(189, 0, 255, 0.5); }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
-        /* File uploader styling */
-        div[data-testid="stFileUploader"] > div > div {
-            border: 2px dashed #00eeff !important;
-            border-radius: 10px !important;
-            padding: 20px !important;
-            background: rgba(25, 25, 40, 0.3) !important;
-            margin-bottom: 1.5rem !important;
-            animation: border-pulse 2s infinite alternate !important;
+        @keyframes glow-pulse {
+            0% { text-shadow: 0 0 10px rgba(0, 238, 255, 0.7); }
+            100% { text-shadow: 0 0 20px rgba(0, 238, 255, 0.9), 
+                             0 0 30px rgba(189, 0, 255, 0.7),
+                             0 0 40px rgba(255, 0, 255, 0.5); }
         }
         
-        @keyframes border-pulse {
-            0% { box-shadow: 0 0 5px #00eeff; }
-            100% { box-shadow: 0 0 20px #00eeff, 0 0 30px #bd00ff; }
-        }
-        
-        /* Chat management header */
         .chat-management-title {
             font-family: 'Arial', sans-serif;
             font-size: 1.4rem;
