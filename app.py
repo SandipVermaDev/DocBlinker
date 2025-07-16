@@ -65,14 +65,7 @@ def get_conversation_chain():
     Answer:
     """
 
-    # Use "gemini-1.5-flash" or "gemini-2.5-flash" for the best free-tier experience.
-    # "gemini-1.5-flash" is very stable. "gemini-2.5-flash" is the latest.
     model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.3)
-    # If "gemini-2.5-flash" causes issues (e.g., if it's still a specific preview name),
-    # you can try "gemini-1.5-flash" or "gemini-1.5-flash-latest".
-    # For a direct model ID, sometimes "models/gemini-2.5-flash" is also used, but
-    # "gemini-2.5-flash" often works as an alias in LangChain.
-
     prompt=PromptTemplate(template=Prompt_template, input_variables=["context", "question"])
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
     return chain
@@ -111,8 +104,94 @@ def export_chat():
     return chat_text
 
 def main():
-    st.set_page_config(page_title="Document Question Answering", page_icon=":book:")
+    st.set_page_config(page_title="DocBlinker", page_icon=":book:")
     st.header("Document Question Answering with LangChain and Google Generative AI")
+
+    # Add cyberpunk styling to buttons and sidebar
+    st.markdown("""
+    <style>
+        /* Cyberpunk button styling - FIXED SELECTORS */
+        div.stButton > button:first-child {
+            background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 25px !important;
+            padding: 10px 25px !important;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 8px 0 !important;
+            box-shadow: 0 0 10px rgba(0, 238, 255, 0.5) !important;
+        }
+        
+        div.stButton > button:first-child:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.8) !important;
+        }
+        
+        /* Download button styling */
+        div.stDownloadButton > button:first-child {
+            background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 25px !important;
+            padding: 10px 25px !important;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 8px 0 !important;
+            box-shadow: 0 0 10px rgba(0, 238, 255, 0.5) !important;
+        }
+        
+        div.stDownloadButton > button:first-child:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.8) !important;
+        }
+        
+        /* Cyberpunk header */
+        .cyber-header {
+            font-family: 'Arial', sans-serif;
+            font-size: 2.5rem;
+            text-align: center;
+            background: linear-gradient(90deg, #00eeff, #ff00ff, #00ff9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 238, 255, 0.7);
+            margin-bottom: 1rem;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(0, 238, 255, 0.7); }
+            to { text-shadow: 0 0 20px rgba(0, 238, 255, 0.9), 0 0 30px rgba(189, 0, 255, 0.5); }
+        }
+        
+        /* File uploader styling */
+        div[data-testid="stFileUploader"] > div > div {
+            border: 2px dashed #00eeff !important;
+            border-radius: 10px !important;
+            padding: 20px !important;
+            background: rgba(25, 25, 40, 0.3) !important;
+            margin-bottom: 1.5rem !important;
+            animation: border-pulse 2s infinite alternate !important;
+        }
+        
+        @keyframes border-pulse {
+            0% { box-shadow: 0 0 5px #00eeff; }
+            100% { box-shadow: 0 0 20px #00eeff, 0 0 30px #bd00ff; }
+        }
+        
+        /* Chat management header */
+        .chat-management-title {
+            font-family: 'Arial', sans-serif;
+            font-size: 1.4rem;
+            color: #00eeff;
+            text-align: center;
+            letter-spacing: 2px;
+            margin: 15px 0;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
     #Clear vector store on app start/refresh
     if 'cleared' not in st.session_state:
@@ -157,9 +236,13 @@ def main():
 
 
     with st.sidebar:
-        st.title("Menu")
+        # DocBlinker header with cyberpunk styling
+        st.markdown('<div class="cyber-header">DOCBLINKER</div>', unsafe_allow_html=True)
+        
         uploaded_files = st.file_uploader("Upload documents (PDF or Word) and click Submit & Process", type=["pdf", "docx"], accept_multiple_files=True)
-        if st.button("Submit and Process"):
+        
+        # Process button with cyberpunk styling
+        if st.button("Submit and Process", key="process_btn"):
             with st.spinner("Processing..."):
                 if uploaded_files:
                     if os.path.exists("faiss_index"):
@@ -172,9 +255,9 @@ def main():
                 else:
                     st.error("Please upload at least one document.")
 
-        # Add chat management buttons
+        # Chat management section
         st.divider()
-        st.subheader("Chat Management")
+        st.markdown('<div class="chat-management-title">CHAT MANAGEMENT</div>', unsafe_allow_html=True)
 
          # Export chat button
         chat_text = export_chat()
@@ -188,8 +271,8 @@ def main():
                 on_click=lambda: st.success("Chat exported successfully!"),
             )
         
-        # Clear chat button
-        if st.button("Clear Chat"):
+        # Clear chat button with cyberpunk styling
+        if st.button("Clear Chat", key="clear_chat"):
             st.session_state.messages = []
             st.session_state.chat_cleared = True
             st.rerun()
@@ -199,8 +282,8 @@ def main():
             st.success("Chat history cleared!")
             st.session_state.chat_cleared = False 
     
-        # Reset session button
-        if st.button("Reset Session"):
+        # Reset session button with cyberpunk styling
+        if st.button("Reset Session", key="reset_session"):
             if os.path.exists("faiss_index"):
                 shutil.rmtree("faiss_index")
             st.session_state.messages = []
