@@ -9,7 +9,7 @@ from docx import Document
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 import google.generativeai as genai
 from langchain_community.vectorstores import FAISS
-from langchain.chains.question_answering import load_qa_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 import io
@@ -66,8 +66,13 @@ def get_conversation_chain():
     """
 
     model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.3)
-    prompt=PromptTemplate(template=Prompt_template, input_variables=["context", "question"])
-    chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
+    prompt = PromptTemplate(template=Prompt_template, input_variables=["context", "question"])
+    
+    # Updated to use create_stuff_documents_chain
+    chain = create_stuff_documents_chain(
+        model,
+        prompt
+    )
     return chain
 
 # Function to handle user input and generate response
@@ -82,12 +87,13 @@ def user_input(user_question):
 
     chain = get_conversation_chain()
 
-    response = chain(
-        {"input_documents": docs, "question": user_question},
-        return_only_outputs=True
-    )
+    # Updated to use invoke() instead of __call__()
+    response = chain.invoke({
+        "context": docs, 
+        "question": user_question
+    })
 
-    return response['output_text']
+    return response
 
 # Function to export chat with timestamps
 def export_chat():
