@@ -183,7 +183,7 @@ def main():
         
         /* Main area styles - REMOVED BACKGROUNDS */
         .stApp {
-            background: #000000 !important;  /* Solid black background */
+            /* Reset to default background */
             color: #e0e0ff !important;
         }
         
@@ -201,21 +201,29 @@ def main():
             animation: gradient-shift 3s ease infinite, glow-pulse 1.5s ease infinite alternate;
         }
         
-        /* Message styles */
+        /* Message styles - UPDATED FOR ALIGNMENT */
         .user-message {
-            border-left: 4px solid #00eeff !important;
-            border-radius: 15px 15px 15px 5px !important;
+            border-right: 4px solid #00eeff !important;
+            border-radius: 15px 0 15px 15px !important;
             padding: 15px !important;
-            margin: 15px 0 !important;
-            color: #e0f7ff !important;
+            margin: 15px 0 15px auto !important;
+            color: inherit !important;
+            max-width: 70%;  /* Maximum width for large screens */
+            width: fit-content; /* Width adjusts to content */
+            text-align: left; /* Ensure text is left-aligned */
+            background-color: rgba(240, 248, 255, 0.1) !important; /* Slight background for contrast */
         }
         
         .assistant-message {
             border-left: 4px solid #bd00ff !important;
-            border-radius: 15px 15px 5px 15px !important;
+            border-radius: 0 15px 15px 15px !important;
             padding: 15px !important;
-            margin: 15px 0 !important;
-            color: #f0e0ff !important;
+            margin: 15px auto 15px 0 !important;
+            color: inherit !important;
+            max-width: 70%;  /* Maximum width for large screens */
+            width: fit-content; /* Width adjusts to content */
+            text-align: left; /* Ensure text is left-aligned */
+            background-color: rgba(245, 245, 255, 0.1) !important; /* Slight background for contrast */
         }
         
         .chat-timestamp {
@@ -225,14 +233,24 @@ def main():
             text-shadow: 0 0 5px rgba(138, 141, 255, 0.7) !important;
         }
         
+        /* User timestamp specific style */
+        .user-timestamp {
+            display: flex;
+            justify-content: flex-end; /* Align to the right */
+            width: 100%;
+        }
+        
         /* Input styling - REMOVED BACKGROUND */
         .stChatInput {
-            background: transparent !important;  /* Removed background */
+            background: transparent !important;
             border: 1px solid #00eeff !important;
             border-radius: 25px !important;
             padding: 15px 20px !important;
             box-shadow: 0 0 15px rgba(0, 238, 255, 0.3) inset, 0 0 10px rgba(0, 238, 255, 0.2) !important;
             margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
         
         .stChatInput:focus-within {
@@ -258,12 +276,49 @@ def main():
         /* Added for message spacing */
         .message-container {
             margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        /* Main content container */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px; /* Added top/bottom padding */
+        }
+        
+        /* Chat area container */
+        .chat-area {
+            padding: 20px;
+            margin: 0 20px; /* Added horizontal margin */
+        }
+        
+        /* Adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .user-message, .assistant-message {
+                max-width: 85%;
+            }
+            
+            .stChatInput {
+                max-width: 95%;
+            }
+            
+            .main-content {
+                padding: 10px;
+            }
+            
+            .chat-area {
+                padding: 10px;
+                margin: 0 10px;
+            }
         }
     </style>
     """, unsafe_allow_html=True)
 
-    # Main area header
-    st.markdown('<div class="main-header">DOCUMENT CHAT INTERFACE</div>', unsafe_allow_html=True)
+    # Create main content container
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+    
+    # Updated header with emojis and animation
+    st.markdown('<div class="main-header">Chat with your Documents! ✨</div>', unsafe_allow_html=True)
 
     # Initialize session state
     if 'cleared' not in st.session_state:
@@ -272,30 +327,34 @@ def main():
         st.session_state.cleared = True
         st.session_state.messages = []
     
-    # Create chat container without background
-    chat_container = st.container()
-    with chat_container:
-        # Display chat messages with custom styling
-        for message in st.session_state.messages:
-            timestamp = message.get("timestamp", "")
-            if message["role"] == "user":
-                st.markdown(f"""
-                <div class="message-container">
-                    <div class="user-message">
+    # Create chat container with margins
+    st.markdown('<div class="chat-area">', unsafe_allow_html=True)
+    
+    # Display chat messages with custom styling
+    for message in st.session_state.messages:
+        timestamp = message.get("timestamp", "")
+        if message["role"] == "user":
+            st.markdown(f"""
+            <div class="message-container">
+                <div class="user-message">
+                    <div class="user-timestamp">
                         <div class="chat-timestamp">{timestamp}USER</div>
-                        {message["content"]}
                     </div>
+                    {message["content"]}
                 </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="message-container">
-                    <div class="assistant-message">
-                        <div class="chat-timestamp">{timestamp}ASSISTANT</div>
-                        {message["content"]}
-                    </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="message-container">
+                <div class="assistant-message">
+                    <div class="chat-timestamp">{timestamp}ASSISTANT</div>
+                    {message["content"]}
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Close chat-area
 
     # Input at bottom
     user_question = st.chat_input("Enter your question about the documents...", key="user_input")
@@ -331,6 +390,9 @@ def main():
         
         # Rerun to show both messages
         st.rerun()
+    
+    # Close main content container
+    st.markdown('</div>', unsafe_allow_html=True)
 
     with st.sidebar:
         # DocBlinker header
@@ -386,7 +448,11 @@ def main():
                 shutil.rmtree("faiss_index")
             st.session_state.messages = []
             st.session_state.cleared = True
+            st.rerun()
+
+        if st.session_state.get("cleared", False):
             st.success("Session reset complete!")
+            st.session_state.cleared = False
 
 if __name__ == "__main__":
     main()
