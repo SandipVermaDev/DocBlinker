@@ -6,9 +6,9 @@ import shutil
 import datetime
 from docx import Document
 
-from langchain_google_genai import GoogleGenerativeAIEmbeddings,ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 import google.generativeai as genai
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
@@ -104,12 +104,12 @@ def export_chat():
     return chat_text
 
 def main():
-    st.set_page_config(page_title="DocBlinker", page_icon=":book:")
-    st.header("Document Question Answering with LangChain and Google Generative AI")
-
-    # Add cyberpunk styling to buttons and sidebar
+    st.set_page_config(page_title="DocBlinker", page_icon=":book:", layout="wide")
+    
+    # Add cyberpunk styling
     st.markdown("""
     <style>
+        /* Sidebar styles */
         div.stButton > button:first-child {
             background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
             color: white !important;
@@ -180,23 +180,128 @@ def main():
             letter-spacing: 2px;
             margin: 15px 0;
         }
+        
+        /* Main area styles - REMOVED BACKGROUNDS */
+        .stApp {
+            background: #000000 !important;  /* Solid black background */
+            color: #e0e0ff !important;
+        }
+        
+        .main-header {
+            font-family: 'Arial', sans-serif;
+            font-size: 2.5rem;
+            text-align: center;
+            background: linear-gradient(270deg, #00eeff, #ff00ff, #00ff9d, #bd00ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(0, 238, 255, 0.8);
+            margin: 1rem 0 2rem 0;
+            padding: 0.5rem;
+            animation: gradient-shift 3s ease infinite, glow-pulse 1.5s ease infinite alternate;
+        }
+        
+        /* Message styles */
+        .user-message {
+            border-left: 4px solid #00eeff !important;
+            border-radius: 15px 15px 15px 5px !important;
+            padding: 15px !important;
+            margin: 15px 0 !important;
+            color: #e0f7ff !important;
+        }
+        
+        .assistant-message {
+            border-left: 4px solid #bd00ff !important;
+            border-radius: 15px 15px 5px 15px !important;
+            padding: 15px !important;
+            margin: 15px 0 !important;
+            color: #f0e0ff !important;
+        }
+        
+        .chat-timestamp {
+            font-size: 0.75rem !important;
+            color: #8a8dff !important;
+            margin-bottom: 5px !important;
+            text-shadow: 0 0 5px rgba(138, 141, 255, 0.7) !important;
+        }
+        
+        /* Input styling - REMOVED BACKGROUND */
+        .stChatInput {
+            background: transparent !important;  /* Removed background */
+            border: 1px solid #00eeff !important;
+            border-radius: 25px !important;
+            padding: 15px 20px !important;
+            box-shadow: 0 0 15px rgba(0, 238, 255, 0.3) inset, 0 0 10px rgba(0, 238, 255, 0.2) !important;
+            margin-top: 20px;
+        }
+        
+        .stChatInput:focus-within {
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.5) inset, 0 0 15px rgba(0, 238, 255, 0.4) !important;
+            border: 1px solid #bd00ff !important;
+        }
+        
+        .stTextInput input {
+            color: #00eeff !important;
+            background: transparent !important;
+            font-size: 1.1rem !important;
+        }
+        
+        .stTextInput input::placeholder {
+            color: #5dadec !important;
+            opacity: 0.8 !important;
+        }
+        
+        .stChatMessage {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        /* Added for message spacing */
+        .message-container {
+            margin-bottom: 20px;
+        }
     </style>
     """, unsafe_allow_html=True)
 
-    #Clear vector store on app start/refresh
+    # Main area header
+    st.markdown('<div class="main-header">DOCUMENT CHAT INTERFACE</div>', unsafe_allow_html=True)
+
+    # Initialize session state
     if 'cleared' not in st.session_state:
         if os.path.exists("faiss_index"):
             shutil.rmtree("faiss_index")
         st.session_state.cleared = True
         st.session_state.messages = []
+    
+    # Create chat container without background
+    chat_container = st.container()
+    with chat_container:
+        # Display chat messages with custom styling
+        for message in st.session_state.messages:
+            timestamp = message.get("timestamp", "")
+            if message["role"] == "user":
+                st.markdown(f"""
+                <div class="message-container">
+                    <div class="user-message">
+                        <div class="chat-timestamp">{timestamp}USER</div>
+                        {message["content"]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="message-container">
+                    <div class="assistant-message">
+                        <div class="chat-timestamp">{timestamp}ASSISTANT</div>
+                        {message["content"]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-     # Input box at bottom (centered)
-    if user_question := st.chat_input("Enter your question about the documents:"):
+    # Input at bottom
+    user_question = st.chat_input("Enter your question about the documents...", key="user_input")
+    
+    # Handle user input
+    if user_question:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
         # Add user message to chat history
         st.session_state.messages.append({
@@ -205,17 +310,17 @@ def main():
             "timestamp": timestamp
         })
         
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(user_question)
+        # Rerun to immediately show user message
+        st.rerun()
+
+    # Process AI response after displaying user message
+    if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+        user_question = st.session_state.messages[-1]["content"]
+        timestamp = st.session_state.messages[-1]["timestamp"]
         
         # Get response
         response = user_input(user_question)
         response_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
-        
-        # Display assistant response
-        with st.chat_message("assistant"):
-            st.markdown(response)
         
         # Add assistant response to chat history
         st.session_state.messages.append({
@@ -223,15 +328,18 @@ def main():
             "content": response,
             "timestamp": response_timestamp
         })
-
+        
+        # Rerun to show both messages
+        st.rerun()
 
     with st.sidebar:
-        # DocBlinker header with cyberpunk styling
+        # DocBlinker header
         st.markdown('<div class="cyber-header">DOCBLINKER</div>', unsafe_allow_html=True)
         
-        uploaded_files = st.file_uploader("Upload documents (PDF or Word) and click Submit & Process", type=["pdf", "docx"], accept_multiple_files=True)
+        uploaded_files = st.file_uploader("Upload documents (PDF or Word) and click Submit & Process", 
+                                         type=["pdf", "docx"], accept_multiple_files=True)
         
-        # Process button with cyberpunk styling
+        # Process button
         if st.button("Submit and Process", key="process_btn"):
             with st.spinner("Processing..."):
                 if uploaded_files:
@@ -261,7 +369,7 @@ def main():
                 on_click=lambda: st.success("Chat exported successfully!"),
             )
         
-        # Clear chat button with cyberpunk styling
+        # Clear chat button
         if st.button("Clear Chat", key="clear_chat"):
             st.session_state.messages = []
             st.session_state.chat_cleared = True
@@ -272,7 +380,7 @@ def main():
             st.success("Chat history cleared!")
             st.session_state.chat_cleared = False 
     
-        # Reset session button with cyberpunk styling
+        # Reset session button
         if st.button("Reset Session", key="reset_session"):
             if os.path.exists("faiss_index"):
                 shutil.rmtree("faiss_index")
