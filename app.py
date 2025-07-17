@@ -4,7 +4,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 import shutil
 import datetime
-import time
 from docx import Document
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
@@ -14,6 +13,8 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 import io
+
+from about import show_about_page
 
 # Load environment variables
 load_dotenv()
@@ -111,6 +112,9 @@ def export_chat():
     return chat_text
 
 def main():
+    if "page" not in st.session_state:
+        st.session_state.page = "main"
+
     st.set_page_config(page_title="DocBlinker", page_icon=":book:", layout="wide")
     
     # Add cyberpunk styling
@@ -321,148 +325,163 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # Create main content container
-    st.markdown('<div class="main-content">', unsafe_allow_html=True)
-    
-    # header with animation
-    st.markdown('<div class="main-header">Chat with your Documents! ✨</div>', unsafe_allow_html=True)
-
-    # Initialize session state
-    if 'cleared' not in st.session_state:
-        if os.path.exists("faiss_index"):
-            shutil.rmtree("faiss_index")
-        st.session_state.cleared = True
-        st.session_state.messages = []
-    
-    # Create chat container with margins
-    st.markdown('<div class="chat-area">', unsafe_allow_html=True)
-    
-    # Display chat messages with custom styling
-    for message in st.session_state.messages:
-        timestamp = message.get("timestamp", "")
-        if message["role"] == "user":
-            st.markdown(f"""
-            <div class="message-container">
-                <div class="user-message">
-                    <div class="user-timestamp">
-                        <div class="chat-timestamp">{timestamp}USER</div>
-                    </div>
-                    {message["content"]}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="message-container">
-                <div class="assistant-message">
-                    <div class="chat-timestamp">{timestamp}ASSISTANT</div>
-                    {message["content"]}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)  # Close chat-area
-
-    # Input at bottom
-    user_question = st.chat_input("Enter your question about the documents...", key="user_input")
-    
-    # Handle user input
-    if user_question:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
-        # Add user message to chat history
-        st.session_state.messages.append({
-            "role": "user", 
-            "content": user_question,
-            "timestamp": timestamp
-        })
-        
-        # Rerun to immediately show user message
-        st.rerun()
-
-    # Process AI response after displaying user message
-    if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-        user_question = st.session_state.messages[-1]["content"]
-        timestamp = st.session_state.messages[-1]["timestamp"]
-        
-        # Get response
-        response = user_input(user_question)
-        response_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
-        
-        # Add assistant response to chat history
-        st.session_state.messages.append({
-            "role": "assistant", 
-            "content": response,
-            "timestamp": response_timestamp
-        })
-        
-        # Rerun to show both messages
-        st.rerun()
-    
-    # Close main content container
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    with st.sidebar:
-        # DocBlinker header
-        st.markdown('<div class="cyber-header">DOCBLINKER</div>', unsafe_allow_html=True)
-        
-        uploaded_files = st.file_uploader("Upload documents (PDF or Word) and click Submit & Process", 
-                                         type=["pdf", "docx"], accept_multiple_files=True)
-        
-        # Process button
-        if st.button("Submit and Process", key="process_btn"):
-            with st.spinner("Processing..."):
-                if uploaded_files:
-                    if os.path.exists("faiss_index"):
-                        shutil.rmtree("faiss_index")
-
-                    text = files_to_text(uploaded_files)
-                    text_chunks = get_text_chunks(text)
-                    get_vectorstore(text_chunks)
-                    st.success("Documents processed successfully!")
-                else:
-                    st.error("Please upload at least one document.")
-
-        # Chat management section
-        st.divider()
-        st.markdown('<div class="chat-management-title">CHAT MANAGEMENT</div>', unsafe_allow_html=True)
-
-         # Export chat button
-        chat_text = export_chat()
-
-        if chat_text:
-            st.download_button(
-                label="Export Chat",
-                data=chat_text,
-                file_name=f"chat_history_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                mime="text/plain",
-                key="download_chat",
-                on_click=lambda: st.toast("Chat history cleared!", icon="✅"),
-            )       
-        
-        # Clear chat button
-        if st.button("Clear Chat", key="clear_chat"):
-            st.session_state.messages = []
-            st.session_state.chat_cleared = True
-            st.toast("Chat history cleared!", icon="✅")
+    if st.session_state.page == "about":
+        show_about_page()
+        if st.button("⬅ Back to Chat", key="back_btn"):
+            st.session_state.page = "main"
             st.rerun()
+    else:
+        # Create main content container
+        st.markdown('<div class="main-content">', unsafe_allow_html=True)
+        
+        # header with animation
+        st.markdown('<div class="main-header">Chat with your Documents! ✨</div>', unsafe_allow_html=True)
 
-        # Show success message after rerun
-        if st.session_state.get("chat_cleared", False):
-            st.toast("Chat history cleared!", icon="✅")
-            st.session_state.chat_cleared = False 
-    
-        # Reset session button
-        if st.button("Reset Session", key="reset_session"):
+        # Initialize session state
+        if 'cleared' not in st.session_state:
             if os.path.exists("faiss_index"):
                 shutil.rmtree("faiss_index")
+            st.session_state.cleared = True
             st.session_state.messages = []
-            st.session_state.show_reset_message = True
+        
+        # Create chat container with margins
+        st.markdown('<div class="chat-area">', unsafe_allow_html=True)
+        
+        # Display chat messages with custom styling
+        for message in st.session_state.messages:
+            timestamp = message.get("timestamp", "")
+            if message["role"] == "user":
+                st.markdown(f"""
+                <div class="message-container">
+                    <div class="user-message">
+                        <div class="user-timestamp">
+                            <div class="chat-timestamp">{timestamp}USER</div>
+                        </div>
+                        {message["content"]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="message-container">
+                    <div class="assistant-message">
+                        <div class="chat-timestamp">{timestamp}ASSISTANT</div>
+                        {message["content"]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)  # Close chat-area
+
+        # Input at bottom
+        user_question = st.chat_input("Enter your question about the documents...", key="user_input")
+        
+        # Handle user input
+        if user_question:
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
+            # Add user message to chat history
+            st.session_state.messages.append({
+                "role": "user", 
+                "content": user_question,
+                "timestamp": timestamp
+            })
+            
+            # Rerun to immediately show user message
             st.rerun()
 
-        # Show reset message after rerun
-        if st.session_state.get("show_reset_message", False):
-            st.toast("Session reset complete!", icon="✅")
-            st.session_state.show_reset_message = False
+        # Process AI response after displaying user message
+        if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+            user_question = st.session_state.messages[-1]["content"]
+            timestamp = st.session_state.messages[-1]["timestamp"]
+            
+            # Get response
+            response = user_input(user_question)
+            response_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
+            
+            # Add assistant response to chat history
+            st.session_state.messages.append({
+                "role": "assistant", 
+                "content": response,
+                "timestamp": response_timestamp
+            })
+            
+            # Rerun to show both messages
+            st.rerun()
+        
+        # Close main content container
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        with st.sidebar:
+            # DocBlinker header
+            st.markdown('<div class="cyber-header">DOCBLINKER</div>', unsafe_allow_html=True)
+            
+            uploaded_files = st.file_uploader("Upload documents (PDF or Word) and click Submit & Process", 
+                                            type=["pdf", "docx"], accept_multiple_files=True)
+            
+            # Process button
+            if st.button("Submit and Process", key="process_btn"):
+                with st.spinner("Processing..."):
+                    if uploaded_files:
+                        if os.path.exists("faiss_index"):
+                            shutil.rmtree("faiss_index")
+
+                        text = files_to_text(uploaded_files)
+                        text_chunks = get_text_chunks(text)
+                        get_vectorstore(text_chunks)
+                        st.success("Documents processed successfully!")
+                    else:
+                        st.error("Please upload at least one document.")
+
+            # Chat management section
+            st.divider()
+            st.markdown('<div class="chat-management-title">CHAT MANAGEMENT</div>', unsafe_allow_html=True)
+
+            # Export chat button
+            chat_text = export_chat()
+
+            if chat_text:
+                st.download_button(
+                    label="Export Chat",
+                    data=chat_text,
+                    file_name=f"chat_history_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                    mime="text/plain",
+                    key="download_chat",
+                    on_click=lambda: st.toast("Chat history cleared!", icon="✅"),
+                )       
+            
+            # Clear chat button
+            if st.button("Clear Chat", key="clear_chat"):
+                st.session_state.messages = []
+                st.session_state.chat_cleared = True
+                st.toast("Chat history cleared!", icon="✅")
+                st.rerun()
+
+            # Show success message after rerun
+            if st.session_state.get("chat_cleared", False):
+                st.toast("Chat history cleared!", icon="✅")
+                st.session_state.chat_cleared = False 
+        
+            # Reset session button
+            if st.button("Reset Session", key="reset_session"):
+                if os.path.exists("faiss_index"):
+                    shutil.rmtree("faiss_index")
+                st.session_state.messages = []
+                st.session_state.show_reset_message = True
+                st.rerun()
+
+            # Show reset message after rerun
+            if st.session_state.get("show_reset_message", False):
+                st.toast("Session reset complete!", icon="✅")
+                st.session_state.show_reset_message = False
+
+            # About section
+            st.divider()
+            st.markdown('<div class="chat-management-title">PROJECT INFO</div>', unsafe_allow_html=True)
+            
+            # Button to navigate to About page
+            if st.button("About Project", key="about_btn"):
+                st.session_state.page = "about"
+                st.rerun()
 
 if __name__ == "__main__":
     main()
