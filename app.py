@@ -4,6 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 import shutil
 import datetime
+import time
 from docx import Document
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
@@ -323,7 +324,7 @@ def main():
     # Create main content container
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
     
-    # Updated header with emojis and animation
+    # header with animation
     st.markdown('<div class="main-header">Chat with your Documents! ✨</div>', unsafe_allow_html=True)
 
     # Initialize session state
@@ -427,6 +428,7 @@ def main():
 
          # Export chat button
         chat_text = export_chat()
+
         if chat_text:
             st.download_button(
                 label="Export Chat",
@@ -434,18 +436,19 @@ def main():
                 file_name=f"chat_history_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                 mime="text/plain",
                 key="download_chat",
-                on_click=lambda: st.success("Chat exported successfully!"),
-            )
+                on_click=lambda: st.toast("Chat history cleared!", icon="✅"),
+            )       
         
         # Clear chat button
         if st.button("Clear Chat", key="clear_chat"):
             st.session_state.messages = []
             st.session_state.chat_cleared = True
+            st.toast("Chat history cleared!", icon="✅")
             st.rerun()
 
         # Show success message after rerun
         if st.session_state.get("chat_cleared", False):
-            st.success("Chat history cleared!")
+            st.toast("Chat history cleared!", icon="✅")
             st.session_state.chat_cleared = False 
     
         # Reset session button
@@ -453,12 +456,13 @@ def main():
             if os.path.exists("faiss_index"):
                 shutil.rmtree("faiss_index")
             st.session_state.messages = []
-            st.session_state.cleared = True
+            st.session_state.show_reset_message = True
             st.rerun()
 
-        if st.session_state.get("cleared", False):
-            st.success("Session reset complete!")
-            st.session_state.cleared = False
+        # Show reset message after rerun
+        if st.session_state.get("show_reset_message", False):
+            st.toast("Session reset complete!", icon="✅")
+            st.session_state.show_reset_message = False
 
 if __name__ == "__main__":
     main()
