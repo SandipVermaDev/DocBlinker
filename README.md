@@ -17,7 +17,7 @@
 
 ---
 
-<!-- ## 🌐 Live Demo
+## 🌐 Live Demo
 
 <p align="center">
   <a href="https://your-streamlit-app-link-here" target="_blank">
@@ -25,11 +25,11 @@
   </a>
 </p>
 
-> **[👉 Click here to try DocBlinker live!](https://your-streamlit-app-link-here)**
+> **[👉 Click here to try DocBlinker live!](https://docblinker.streamlit.app/)**
 
 ---
 
-## 🎬 Demo GIF
+<!-- ## 🎬 Demo GIF
 
 <p align="center">
   <img src="demo/demo.gif" alt="DocBlinker Demo" width="700" />
