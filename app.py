@@ -219,10 +219,10 @@ def main():
             padding: 15px !important;
             margin: 15px 0 15px auto !important;
             color: inherit !important;
-            max-width: 70%;  /* Maximum width for large screens */
-            width: fit-content; /* Width adjusts to content */
-            text-align: left; /* Ensure text is left-aligned */
-            background-color: rgba(240, 248, 255, 0.1) !important; /* Slight background for contrast */
+            max-width: 70%;
+            width: fit-content;
+            text-align: right;
+            background-color: rgba(240, 248, 255, 0.1) !important;
         }
         
         .assistant-message {
@@ -231,10 +231,10 @@ def main():
             padding: 15px !important;
             margin: 15px auto 15px 0 !important;
             color: inherit !important;
-            max-width: 70%;  /* Maximum width for large screens */
-            width: fit-content; /* Width adjusts to content */
-            text-align: left; /* Ensure text is left-aligned */
-            background-color: rgba(245, 245, 255, 0.1) !important; /* Slight background for contrast */
+            max-width: 70%;  
+            width: fit-content; 
+            text-align: left; 
+            background-color: rgba(245, 245, 255, 0.1) !important; 
         }
         
         .chat-timestamp {
