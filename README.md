@@ -29,13 +29,13 @@
 
 ---
 
-<!-- ## 🎬 Demo GIF
+## 🎬 Demo GIF
 
 <p align="center">
   <img src="demo/demo.gif" alt="DocBlinker Demo" width="700" />
 </p>
 
---- -->
+---
 
 ## ✨ Features
 
