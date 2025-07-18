@@ -20,7 +20,7 @@
 ## 🌐 Live Demo
 
 <p align="center">
-  <a href="https://your-streamlit-app-link-here" target="_blank">
+  <a href="https://docblinker.streamlit.app/" target="_blank">
     <img src="https://img.shields.io/badge/Launch%20App-Streamlit-ff4b4b?logo=streamlit&logoColor=white&style=for-the-badge" alt="Streamlit App" />
   </a>
 </p>
