@@ -122,7 +122,7 @@ def main():
         st.session_state.page = "main"
 
     st.set_page_config(page_title="DocBlinker", page_icon=":book:", layout="wide")
-    
+
     # Add cyberpunk styling
     st.markdown("""
     <style>
@@ -331,6 +331,20 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
+    # Add CSS for sidebar responsiveness
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        min-width: 425px;
+    }
+    @media (max-width: 900px) {
+        [data-testid="stSidebar"][aria-expanded="true"] {
+            min-width: 100vw !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     if st.session_state.page == "about":
         show_about_page()
         if st.button("⬅ Back to Chat", key="back_btn"):
@@ -377,7 +391,7 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # Close chat-area
+        st.markdown('</div>', unsafe_allow_html=True) 
 
         # Input at bottom
         user_question = st.chat_input("Enter your question about the documents...", key="user_input")
