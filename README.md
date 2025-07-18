@@ -17,6 +17,26 @@
 
 ---
 
+## 🌐 Live Demo
+
+<p align="center">
+  <a href="https://your-streamlit-app-link-here" target="_blank">
+    <img src="https://img.shields.io/badge/Launch%20App-Streamlit-ff4b4b?logo=streamlit&logoColor=white&style=for-the-badge" alt="Streamlit App" />
+  </a>
+</p>
+
+> **[👉 Click here to try DocBlinker live!](https://your-streamlit-app-link-here)**
+
+---
+
+## 🎬 Demo GIF
+
+<p align="center">
+  <img src="demo/demo.gif" alt="DocBlinker Demo" width="700" />
+</p>
+
+---
+
 ## ✨ Features
 
 - 📄 **Multi-file Upload:** Supports PDF and DOCX files, multiple at once.
@@ -25,18 +45,6 @@
 - 🗂️ **Local Vector Store:** Efficient document retrieval with FAISS.
 - 🖥️ **Modern UI:** Cyberpunk-inspired Streamlit interface with chat, export, and reset features.
 - 🔒 **Privacy First:** All processing is local (except for embedding/LLM API calls).
-
----
-
-## 🖼️ Screenshots
-
-<!--
-Add your screenshots here. Example:
-
-<p align="center">
-  <img src="screenshots/main_chat.png" width="700" />
-</p>
--->
 
 ---
 

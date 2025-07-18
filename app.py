@@ -16,11 +16,17 @@ import io
 
 from about import show_about_page
 
-# Load environment variables
+# Load .env only if running locally
 load_dotenv()
 
+# Get API key from Streamlit secrets if available, else fallback to .env
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+except Exception:
+    api_key = os.getenv("GOOGLE_API_KEY")
+
 # Configure Google Generative AI
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+genai.configure(api_key=api_key)
 
 # Function to extract text from uploaded files
 def extract_text_from_file(uploaded_file):
