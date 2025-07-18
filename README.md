@@ -17,7 +17,7 @@
 
 ---
 
-## 🌐 Live Demo
+<!-- ## 🌐 Live Demo
 
 <p align="center">
   <a href="https://your-streamlit-app-link-here" target="_blank">
@@ -35,7 +35,7 @@
   <img src="demo/demo.gif" alt="DocBlinker Demo" width="700" />
 </p>
 
----
+--- -->
 
 ## ✨ Features
 

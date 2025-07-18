@@ -23,6 +23,7 @@ load_dotenv()
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
 except Exception:
+    st.warning("Using API key from .env file")
     api_key = os.getenv("GOOGLE_API_KEY")
 
 # Configure Google Generative AI
