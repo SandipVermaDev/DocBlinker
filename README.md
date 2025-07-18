@@ -107,6 +107,8 @@ DocBlinker/
 ├── app.py           # Main Streamlit app
 ├── about.py         # About page
 ├── requirements.txt # Python dependencies
+├── .env             # Environment variables
+├── .gitignore       # Git ignore file
 ├── faiss_index/     # Vector store (auto-generated)
 ├── venv/            # Virtual environment (optional)
 └── ...

@@ -128,9 +128,29 @@ def main():
     st.markdown("""
     <style>
         /* Sidebar styles */
+        .stSidebar {
+            border-right: 2px solid #ffe600 !important;
+        }
+
+        .stFileUploader {
+            border: 2px solid #ffe600 !important;
+            border-radius: 18px !important;
+            animation: cyber-border-anim 3s linear infinite;
+            box-shadow: 0 0 18px 2px rgba(255, 230, 0, 0.4);
+            padding: 12px 10px 12px 10px;
+            background: rgba(40, 40, 10, 0.12);
+            margin-bottom: 18px;
+            transition: box-shadow 0.3s;
+        }
+
+        .stFileUploader:hover {
+            box-shadow: 0 0 32px 6px rgba(255, 230, 0, 0.7);
+            border: 2px solid #ffae00 !important;
+        }
+        
         div.stButton > button:first-child {
-            background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
-            color: white !important;
+            background: linear-gradient(90deg, #ffe600, #ffae00) !important;
+            color: #222 !important;
             border: none !important;
             border-radius: 25px !important;
             padding: 10px 25px !important;
@@ -138,17 +158,17 @@ def main():
             transition: all 0.3s ease;
             width: 100%;
             margin: 8px 0 !important;
-            box-shadow: 0 0 10px rgba(0, 238, 255, 0.5) !important;
+            box-shadow: 0 0 10px rgba(255, 230, 0, 0.5) !important;
         }
         
         div.stButton > button:first-child:hover {
             transform: translateY(-3px);
-            box-shadow: 0 0 20px rgba(0, 238, 255, 0.8) !important;
+            box-shadow: 0 0 20px rgba(255, 230, 0, 0.8) !important;
         }
         
         div.stDownloadButton > button:first-child {
-            background: linear-gradient(90deg, #00eeff, #bd00ff) !important;
-            color: white !important;
+            background: linear-gradient(90deg, #ffe600, #ffae00) !important;
+            color: #222 !important;
             border: none !important;
             border-radius: 25px !important;
             padding: 10px 25px !important;
@@ -156,23 +176,23 @@ def main():
             transition: all 0.3s ease;
             width: 100%;
             margin: 8px 0 !important;
-            box-shadow: 0 0 10px rgba(0, 238, 255, 0.5) !important;
+            box-shadow: 0 0 10px rgba(255, 230, 0, 0.5) !important;
         }
         
         div.stDownloadButton > button:first-child:hover {
             transform: translateY(-3px);
-            box-shadow: 0 0 20px rgba(0, 238, 255, 0.8) !important;
+            box-shadow: 0 0 20px rgba(255, 230, 0, 0.8) !important;
         }
         
         .cyber-header {
             font-family: 'Arial', sans-serif;
             font-size: 2.8rem;
             text-align: center;
-            background: linear-gradient(270deg, #00eeff, #ff00ff, #00ff9d, #bd00ff);
+            background: linear-gradient(270deg, #ffe600, #ffae00, #fff700, #ffd700);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 238, 255, 0.7);
+            text-shadow: 0 0 10px rgba(255, 230, 0, 0.7);
             margin-bottom: 1.5rem;
             animation: gradient-shift 3s ease infinite, glow-pulse 1.5s ease infinite alternate;
         }
@@ -184,16 +204,16 @@ def main():
         }
         
         @keyframes glow-pulse {
-            0% { text-shadow: 0 0 10px rgba(0, 238, 255, 0.7); }
-            100% { text-shadow: 0 0 20px rgba(0, 238, 255, 0.9), 
-                             0 0 30px rgba(189, 0, 255, 0.7),
-                             0 0 40px rgba(255, 0, 255, 0.5); }
+            0% { text-shadow: 0 0 10px rgba(255, 230, 0, 0.7); }
+            100% { text-shadow: 0 0 20px rgba(255, 230, 0, 0.9), 
+                             0 0 30px rgba(255, 174, 0, 0.7),
+                             0 0 40px rgba(255, 247, 0, 0.5); }
         }
         
         .chat-management-title {
             font-family: 'Arial', sans-serif;
             font-size: 1.4rem;
-            color: #00eeff;
+            color: #ffe600;
             text-align: center;
             letter-spacing: 2px;
             margin: 15px 0;
@@ -201,19 +221,18 @@ def main():
         
         /* Main area styles - REMOVED BACKGROUNDS */
         .stApp {
-            /* Reset to default background */
-            color: #e0e0ff !important;
+            color: #fffbe0 !important;
         }
         
         .main-header {
             font-family: 'Arial', sans-serif;
             font-size: 2.5rem;
             text-align: center;
-            background: linear-gradient(270deg, #00eeff, #ff00ff, #00ff9d, #bd00ff);
+            background: linear-gradient(270deg, #ffe600, #ffae00, #fff700, #ffd700);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(0, 238, 255, 0.8);
+            text-shadow: 0 0 15px rgba(255, 230, 0, 0.8);
             margin: 1rem 0 2rem 0;
             padding: 0.5rem;
             animation: gradient-shift 3s ease infinite, glow-pulse 1.5s ease infinite alternate;
@@ -221,7 +240,7 @@ def main():
         
         /* Message styles - UPDATED FOR ALIGNMENT */
         .user-message {
-            border-right: 4px solid #00eeff !important;
+            border-right: 4px solid #ffe600 !important;
             border-radius: 15px 0 15px 15px !important;
             padding: 15px !important;
             margin: 15px 0 15px auto !important;
@@ -229,11 +248,11 @@ def main():
             max-width: 70%;
             width: fit-content;
             text-align: right;
-            background-color: rgba(240, 248, 255, 0.1) !important;
+            background-color: rgba(255, 255, 224, 0.1) !important;
         }
         
         .assistant-message {
-            border-left: 4px solid #bd00ff !important;
+            border-left: 4px solid #ffae00 !important;
             border-radius: 0 15px 15px 15px !important;
             padding: 15px !important;
             margin: 15px auto 15px 0 !important;
@@ -241,14 +260,14 @@ def main():
             max-width: 70%;  
             width: fit-content; 
             text-align: left; 
-            background-color: rgba(245, 245, 255, 0.1) !important; 
+            background-color: rgba(255, 255, 224, 0.08) !important; 
         }
         
         .chat-timestamp {
             font-size: 0.75rem !important;
-            color: #8a8dff !important;
+            color: #ffe600 !important;
             margin-bottom: 5px !important;
-            text-shadow: 0 0 5px rgba(138, 141, 255, 0.7) !important;
+            text-shadow: 0 0 5px rgba(255, 230, 0, 0.7) !important;
         }
         
         /* User timestamp specific style */
@@ -261,10 +280,10 @@ def main():
         /* Input styling - REMOVED BACKGROUND */
         .stChatInput {
             background: transparent !important;
-            border: 1px solid #00eeff !important;
+            border: 2px solid #ffe600 !important;
             border-radius: 25px !important;
-            padding: 15px 20px !important;
-            box-shadow: 0 0 15px rgba(0, 238, 255, 0.3) inset, 0 0 10px rgba(0, 238, 255, 0.2) !important;
+            # padding: 15px 20px !important;
+            box-shadow: 0 0 15px rgba(255, 230, 0, 0.3) inset, 0 0 10px rgba(255, 230, 0, 0.2) !important;
             margin-top: 20px;
             max-width: 800px;
             margin-left: auto !important;
@@ -272,18 +291,18 @@ def main():
         }
         
         .stChatInput:focus-within {
-            box-shadow: 0 0 20px rgba(0, 238, 255, 0.5) inset, 0 0 15px rgba(0, 238, 255, 0.4) !important;
-            border: 1px solid #bd00ff !important;
+            box-shadow: 0 0 20px rgba(255, 230, 0, 0.5) inset, 0 0 15px rgba(255, 230, 0, 0.4) !important;
+            border: 2px solid #ffae00 !important;
         }
         
         .stTextInput input {
-            color: #00eeff !important;
+            color: #ffe600 !important;
             background: transparent !important;
             font-size: 1.1rem !important;
         }
         
         .stTextInput input::placeholder {
-            color: #5dadec !important;
+            color: #ffe600 !important;
             opacity: 0.8 !important;
         }
         

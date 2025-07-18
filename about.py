@@ -13,11 +13,11 @@ def show_about_page():
             font-family: 'Arial', sans-serif;
             font-size: 2.8rem;
             text-align: center;
-            background: linear-gradient(270deg, #00eeff, #ff00ff, #00ff9d, #bd00ff);
+            background: linear-gradient(270deg, #ffe600, #ffae00, #fff700, #ffd700);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 238, 255, 0.7);
+            text-shadow: 0 0 10px rgba(255, 230, 0, 0.7);
             margin-bottom: 1.5rem;
             animation: gradient-shift 3s ease infinite, glow-pulse 1.5s ease infinite alternate;
         }
@@ -29,10 +29,10 @@ def show_about_page():
         }
 
         @keyframes glow-pulse {
-            0% { text-shadow: 0 0 10px rgba(0, 238, 255, 0.7); }
-            100% { text-shadow: 0 0 20px rgba(0, 238, 255, 0.9),
-                             0 0 30px rgba(189, 0, 255, 0.7),
-                             0 0 40px rgba(255, 0, 255, 0.5); }
+            0% { text-shadow: 0 0 10px rgba(255, 230, 0, 0.7); }
+            100% { text-shadow: 0 0 20px rgba(255, 230, 0, 0.9),
+                             0 0 30px rgba(255, 174, 0, 0.7),
+                             0 0 40px rgba(255, 247, 0, 0.5); }
         }
 
         .main-content {
@@ -42,23 +42,36 @@ def show_about_page():
         }
 
         .section {
-            background: rgba(30, 30, 50, 0.85);
+            background: rgba(50, 50, 10, 0.85);
+            border: 2px solid #ffe600;
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 35px;
-            box-shadow: 0 0 25px rgba(0, 238, 255, 0.3);
+            box-shadow: 0 0 25px rgba(255, 230, 0, 0.3);
+        }
+
+        .section:hover {
+            border: 2px solid #ffae00;
+            box-shadow: 0 0 32px 6px rgba(255, 230, 0, 0.7);
         }
 
         .tech-card {
-            background: rgba(20, 20, 40, 0.85);
-            border-radius: 10px;
+            background: rgba(60, 60, 20, 0.85);
+            border: 1px solid #ffe600;
+            border-radius: 20px;
             padding: 20px;
             margin: 15px 0;
-            border-left: 4px solid #00eeff;
+            border-left: 6px solid #ffe600;
+        }
+
+        .tech-card:hover {
+            border: 2px solid #ffae00;
+            box-shadow: 0 0 32px 6px rgba(255, 230, 0, 0.7);
+            border-left: 8px solid #ffae00;
         }
 
         .highlight {
-            color: #90ee90;
+            color: #ffe600;
             font-weight: 600;
         }
 
@@ -67,17 +80,22 @@ def show_about_page():
             font-size: 0.95rem;
             margin-top: 40px;
             margin-bottom: 20px;
-            color: #ccc;
+            color: #ffe600;
         }
 
         .footer a {
-            color: #00eeff;
+            color: #ffae00;
             text-decoration: none;
             margin: 0 8px;
         }
 
+        .footer a:hover {
+            color: #00ff00;
+            text-decoration: underline;
+        }
+
         h1, h2, h3 {
-            color: #00eeff;
+            color: #ffe600;
         }
 
         .feature-list {
