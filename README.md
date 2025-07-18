@@ -45,12 +45,13 @@
 - 🗂️ **Local Vector Store:** Efficient document retrieval with FAISS.
 - 🖥️ **Modern UI:** Cyberpunk-inspired Streamlit interface with chat, export, and reset features.
 - 🔒 **Privacy First:** All processing is local (except for embedding/LLM API calls).
+- 💬 **Real-time Streaming Responses:** See the assistant's answer appear live as it's generated, for a more interactive chat experience.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **[Streamlit](https://streamlit.io/):** Interactive web UI
+- **[Streamlit](https://streamlit.io/):** Interactive web UI (with real-time streaming chat)
 - **[LangChain](https://python.langchain.com/):** Document parsing, chunking, and chains
 - **[Google Gemini 2.5 Flash](https://ai.google.dev/):** LLM for answer generation
 - **[Google Generative AI Embeddings](https://ai.google.dev/):** Semantic vector embeddings
