@@ -84,25 +84,35 @@ def get_conversation_chain():
     )
     return chain
 
-# Function to handle user input and generate response
-def user_input(user_question):
+# Function to handle user input and generate streaming response
+def streaming_user_input(user_question):
     if not os.path.exists("faiss_index"):
-        return "Error: Please upload and process documents first."
+        yield "Error: Please upload and process documents first."
+        return
 
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
     new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question, k=3)
-
     chain = get_conversation_chain()
 
-    # Updated to use invoke() instead of __call__()
-    response = chain.invoke({
-        "context": docs, 
+    # Use stream for streaming output
+    for chunk in chain.stream({
+        "context": docs,
         "question": user_question
-    })
-
-    return response
+    }):
+        # chunk is usually a dict with 'answer' or similar key
+        # If chunk is a string, just yield it
+        if isinstance(chunk, dict):
+            # Try common keys
+            for key in ["answer", "output", "text", "result"]:
+                if key in chunk:
+                    yield chunk[key]
+                    break
+            else:
+                # Fallback: yield stringified chunk
+                yield str(chunk)
+        else:
+            yield str(chunk)
 
 # Function to export chat with timestamps
 def export_chat():
@@ -433,19 +443,18 @@ def main():
         if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
             user_question = st.session_state.messages[-1]["content"]
             timestamp = st.session_state.messages[-1]["timestamp"]
-            
-            # Get response
-            response = user_input(user_question)
+
+            # Streaming response
             response_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
-            
+            with st.spinner("Assistant is typing..."):
+                response = st.write_stream(streaming_user_input(user_question))
+
             # Add assistant response to chat history
             st.session_state.messages.append({
-                "role": "assistant", 
+                "role": "assistant",
                 "content": response,
                 "timestamp": response_timestamp
             })
-            
-            # Rerun to show both messages
             st.rerun()
         
         # Close main content container
