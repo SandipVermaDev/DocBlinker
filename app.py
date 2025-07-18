@@ -444,15 +444,28 @@ def main():
             user_question = st.session_state.messages[-1]["content"]
             timestamp = st.session_state.messages[-1]["timestamp"]
 
-            # Streaming response
             response_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S - ")
-            with st.spinner("Assistant is typing..."):
-                response = st.write_stream(streaming_user_input(user_question))
 
-            # Add assistant response to chat history
+            # Create a placeholder for the assistant's message
+            assistant_placeholder = st.empty()
+            # Show spinner and stream output in the same chat bubble
+            with assistant_placeholder:
+                with st.spinner("Assistant is typing..."):
+                    streamed_text = ""
+                    for chunk in streaming_user_input(user_question):
+                        streamed_text += chunk
+                        assistant_placeholder.markdown(f'''
+                        <div class="message-container">
+                            <div class="assistant-message">
+                                <div class="chat-timestamp">{response_timestamp}ASSISTANT</div>
+                                {streamed_text}
+                            </div>
+                        </div>
+                        ''', unsafe_allow_html=True)
+            # Add the final response to chat history
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": response,
+                "content": streamed_text,
                 "timestamp": response_timestamp
             })
             st.rerun()
