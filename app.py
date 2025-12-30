@@ -1,6 +1,6 @@
 import streamlit as st
 from PyPDF2 import PdfReader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 import shutil
 import datetime
@@ -10,7 +10,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 import google.generativeai as genai
 from langchain_community.vectorstores import FAISS
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
 import io
 
@@ -59,7 +59,7 @@ def get_text_chunks(text):
 
 # Function to create a vector store from text chunks
 def get_vectorstore(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     vectorstore = FAISS.from_texts(text_chunks, embeddings)
     vectorstore.save_local("faiss_index")    
 
@@ -90,7 +90,7 @@ def streaming_user_input(user_question):
         yield "Error: Please upload and process documents first."
         return
 
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question, k=3)
     chain = get_conversation_chain()
