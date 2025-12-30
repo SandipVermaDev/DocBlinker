@@ -180,6 +180,13 @@ def main():
             transform: translateY(-3px);
             box-shadow: 0 0 20px rgba(255, 230, 0, 0.8) !important;
         }
+
+        /* Ensure sidebar action buttons span full width (but do not touch the uploader) */
+        [data-testid="stSidebar"] div.stButton > button:first-child,
+        [data-testid="stSidebar"] div.stDownloadButton > button:first-child {
+            width: 100% !important;
+            display: block !important;
+        }
         
         .cyber-header {
             font-family: 'Arial', sans-serif;
