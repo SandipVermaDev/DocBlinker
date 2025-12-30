@@ -475,7 +475,7 @@ def main():
                                             type=["pdf", "docx"], accept_multiple_files=True)
             
             # Process button
-            if st.button("Submit and Process", key="process_btn"):
+            if st.button("Submit and Process", key="process_btn", use_container_width=True):
                 with st.spinner("Processing..."):
                     if uploaded_files:
                         if os.path.exists("faiss_index"):
@@ -502,11 +502,12 @@ def main():
                     file_name=f"chat_history_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                     mime="text/plain",
                     key="download_chat",
+                    use_container_width=True,
                     on_click=lambda: st.toast("Chat history cleared!", icon="✅"),
                 )       
             
             # Clear chat button
-            if st.button("Clear Chat", key="clear_chat"):
+            if st.button("Clear Chat", key="clear_chat", use_container_width=True):
                 st.session_state.messages = []
                 st.session_state.chat_cleared = True
                 st.toast("Chat history cleared!", icon="✅")
@@ -518,7 +519,7 @@ def main():
                 st.session_state.chat_cleared = False 
         
             # Reset session button
-            if st.button("Reset Session", key="reset_session"):
+            if st.button("Reset Session", key="reset_session", use_container_width=True):
                 if os.path.exists("faiss_index"):
                     shutil.rmtree("faiss_index")
                 st.session_state.messages = []
@@ -535,7 +536,7 @@ def main():
             st.markdown('<div class="chat-management-title">PROJECT INFO</div>', unsafe_allow_html=True)
             
             # Button to navigate to About page
-            if st.button("About Project", key="about_btn"):
+            if st.button("About Project", key="about_btn", use_container_width=True):
                 st.session_state.page = "about"
                 st.rerun()
 
