@@ -180,12 +180,6 @@ def main():
             transform: translateY(-3px);
             box-shadow: 0 0 20px rgba(255, 230, 0, 0.8) !important;
         }
-
-        /* Ensure sidebar buttons always span full width (Streamlit Cloud sometimes shrinks them) */
-        [data-testid="stSidebar"] button {
-            width: 100% !important;
-            display: block !important;
-        }
         
         .cyber-header {
             font-family: 'Arial', sans-serif;
