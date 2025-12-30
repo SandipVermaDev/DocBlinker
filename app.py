@@ -9,7 +9,6 @@ from docx import Document
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 import google.generativeai as genai
 from langchain_community.vectorstores import FAISS
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
 import io
@@ -63,8 +62,7 @@ def get_vectorstore(text_chunks):
     vectorstore = FAISS.from_texts(text_chunks, embeddings)
     vectorstore.save_local("faiss_index")    
 
-# Function to create a conversation chain for question answering
-def get_conversation_chain():
+def build_prompt_and_model():
     Prompt_template = """
     Answer the question as detailed as possible from the provided context, make sure to provide all the details, if the answer is not in the provided context, 
     say exactly "Answer is not available in the provided context", don't provide the wrong answer \n\n
@@ -76,13 +74,7 @@ def get_conversation_chain():
 
     model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.3)
     prompt = PromptTemplate(template=Prompt_template, input_variables=["context", "question"])
-    
-    # Updated to use create_stuff_documents_chain
-    chain = create_stuff_documents_chain(
-        model,
-        prompt
-    )
-    return chain
+    return prompt, model
 
 # Function to handle user input and generate streaming response
 def streaming_user_input(user_question):
@@ -93,26 +85,19 @@ def streaming_user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question, k=3)
-    chain = get_conversation_chain()
+    prompt, model = build_prompt_and_model()
 
-    # Use stream for streaming output
-    for chunk in chain.stream({
-        "context": docs,
-        "question": user_question
-    }):
-        # chunk is usually a dict with 'answer' or similar key
-        # If chunk is a string, just yield it
-        if isinstance(chunk, dict):
-            # Try common keys
-            for key in ["answer", "output", "text", "result"]:
-                if key in chunk:
-                    yield chunk[key]
-                    break
-            else:
-                # Fallback: yield stringified chunk
-                yield str(chunk)
-        else:
-            yield str(chunk)
+    # Combine retrieved docs into a single context string
+    context_text = "\n\n".join(doc.page_content for doc in docs)
+    full_prompt = prompt.format(context=context_text, question=user_question)
+
+    # Stream model output directly
+    for chunk in model.stream(full_prompt):
+        # Prefer plain content over repr to keep output human-friendly
+        content = getattr(chunk, "content", None)
+        if content is None:
+            content = str(chunk)
+        yield content
 
 # Function to export chat with timestamps
 def export_chat():
