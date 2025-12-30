@@ -64,13 +64,18 @@ def get_vectorstore(text_chunks):
 
 def build_prompt_and_model():
     Prompt_template = """
-    Answer the question as detailed as possible from the provided context, make sure to provide all the details, if the answer is not in the provided context, 
-    say exactly "Answer is not available in the provided context", don't provide the wrong answer \n\n
-    Context:\n{context}?\n 
-    Question:\n{question}\n
+        You are a friendly assistant that can understand and reply in English, Hinglish, and any local language supported by Gemini. 
+        Always answer based on the provided context; if the answer is not in the context, say exactly "Answer is not available in the provided context" and do not fabricate details.
+        Keep the tone concise, helpful, and add fitting emojis for warmth and clarity. If the user greets, thanks, or chats casually, respond briefly and politely.
 
-    Answer:
-    """
+        Context:
+        {context}
+
+        Question:
+        {question}
+
+        Answer:
+        """
 
     model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.3)
     prompt = PromptTemplate(template=Prompt_template, input_variables=["context", "question"])
