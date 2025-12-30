@@ -154,6 +154,7 @@ def main():
             width: 100%;
             margin: 8px 0 !important;
             box-shadow: 0 0 10px rgba(255, 230, 0, 0.5) !important;
+            display: block !important;
         }
         
         div.stButton > button:first-child:hover {
@@ -172,11 +173,18 @@ def main():
             width: 100%;
             margin: 8px 0 !important;
             box-shadow: 0 0 10px rgba(255, 230, 0, 0.5) !important;
+            display: block !important;
         }
         
         div.stDownloadButton > button:first-child:hover {
             transform: translateY(-3px);
             box-shadow: 0 0 20px rgba(255, 230, 0, 0.8) !important;
+        }
+
+        /* Ensure sidebar buttons always span full width (Streamlit Cloud sometimes shrinks them) */
+        [data-testid="stSidebar"] button {
+            width: 100% !important;
+            display: block !important;
         }
         
         .cyber-header {
